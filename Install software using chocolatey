@@ -1,0 +1,35 @@
+#RequireAdmin
+#include <File.au3>
+
+;-------------------------------------------------------------------------------------------------------------------------------------------
+
+install("winrar",True)
+
+;-------------------------------------------------------------------------------------------------------------------------------------------
+
+;Installs chocolatey.
+$choco1 = "@powershell -NoProfile -ExecutionPolicy unrestricted -Command"
+$choco2 = " (iex ((new-object net.webclient).DownloadString('https://chocolatey.org/install.ps1'))) >$null 2>&1"
+$choco3 = " && SET PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"
+
+if not FileExists(@AppDataCommonDir & "\Chocolatey\") then
+RunWait(@ComSpec & " /C " & $choco1 & $choco2 & $choco3, "", @SW_HIDE)
+$find = '"' & "allowGlobalConfirmation" & '"' & " enabled=" & '"' & "false" & '"' & " setExplicitly=" & '"' & "false" & '"'
+$replace = '"' & "allowGlobalConfirmation" & '"' & " enabled=" & '"' & "true" & '"' & " setExplicitly=" & '"' & "true" & '"'
+_ReplaceStringInFile(@AppDataCommonDir & "\Chocolatey\config\chocolatey.config", $find, $replace)
+EndIf
+
+;-------------------------------------------------------------------------------------------------------------------------------------------
+
+;Install and uninstall functions
+Func install($package_name,$notify)
+RunWait(@ComSpec & " /C " & "choco install " & $package_name, "", @SW_HIDE)
+if $notify = True Then MsgBox(64,"Installed", $package_name & " has been installed.")
+EndFunc
+
+Func uninstall($package_name, $notify)
+RunWait(@ComSpec & " /C " & "choco uninstall " & $package_name, "", @SW_HIDE)
+if $notify = True Then MsgBox(64,"Uninstalled", $package_name & " has been uninstalled.")
+EndFunc
+
+;-------------------------------------------------------------------------------------------------------------------------------------------
